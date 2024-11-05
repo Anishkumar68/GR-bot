@@ -141,11 +141,12 @@ li {
 }
 
 /* Header Styling */
+
+/* Styles for Chatbot Header */
 .chatbot-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 15px;
+  padding: 10px;
   background-color: rgba(255, 255, 255, 0.8);
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   position: sticky;
@@ -153,19 +154,32 @@ li {
   z-index: 10;
 }
 
-.chatbot-logo span {
+/* Styles for the logo container */
+.chatbot-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  margin-right: 4px;
 }
 
-.chatbot-logo span {
-  height: 40px;
+/* Adjust logo image */
+.chatbot-logo img {
+  height: 70px;
+  width: 70px;
+  overflow: hidden;
+  border-radius: 50px;
 }
 
-.chatbot-logo h1 {
+img {
+  width: 100%;
+}
+
+/* Style for the text */
+.logo-text {
   font-size: 1.5em;
+  font-weight: bold;
   color: #333;
+  margin-top: 15px;
 }
 
 /* Chat Messages */

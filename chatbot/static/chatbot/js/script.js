@@ -5,7 +5,7 @@ window.addEventListener("load", function () {
 
   // Function to handle sending the message
   async function sendMessage(event) {
-    event.preventDefault(); // Prevent form from refreshing the page
+    if (event) event.preventDefault(); // Prevent form from refreshing the page if called from an event
 
     const userMessage = textInput.value.trim();
     if (!userMessage) return; // Exit if message is empty
@@ -53,14 +53,8 @@ window.addEventListener("load", function () {
   }
 
   // Event listeners for form submission and Enter key
-  // Enter key & send button for Send message
-  document
-    .getElementById("user-input")
-    .addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        sendMessage();
-      }
-    });
-
-  document.querySelector(".btn-send").addEventListener("click", sendMessage);
+  textInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") sendMessage(e); // Pass the event to sendMessage
+  });
+  document.querySelector(".btn-send").addEventListener("click", sendMessage); // No event needed here
 });
