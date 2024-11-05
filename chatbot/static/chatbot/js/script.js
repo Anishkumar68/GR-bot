@@ -1,64 +1,59 @@
 window.addEventListener("load", function () {
-  // Function to handle sending user input
-  function sendMessage() {
-    // Get the user's input text
-    const userInput = document.getElementById("user-input").value.trim();
+  const chatForm = document.getElementById("chatForm");
+  const textInput = document.getElementById("user-input");
+  const messageContainer = document.querySelector(".chatbot-messages");
 
-    // Check if input is not empty
-    if (userInput) {
-      // Add user message to chat
-      addMessage(userInput, "user-message");
+  // Function to handle sending the message
+  async function sendMessage(event) {
+    event.preventDefault(); // Prevent form from refreshing the page
 
-      // Clear the input field
-      document.getElementById("user-input").value = "";
+    const userMessage = textInput.value.trim();
+    if (!userMessage) return; // Exit if message is empty
 
-      // Simulate AI response after a short delay
-      setTimeout(() => {
-        const aiResponse = getAIResponse(userInput);
-        addMessage(aiResponse, "ai-response");
-      }, 500); // Adjust delay as needed
-    }
+    // Display user message in the chat
+    addMessage(userMessage, "user-message");
+    textInput.value = ""; // Clear the input field
+
+    // Send the user message to the backend via a POST request
+    const response = await fetch("/chatbot-response/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: userMessage }),
+    });
+
+    // Parse the JSON response from the backend
+    const data = await response.json();
+
+    // Display the AI response in the chat
+    const aiResponse = data.message;
+    addMessage(aiResponse, "ai-response");
   }
 
-  // Function to add a message to the chat area
+  // Function to add a message to the chat UI
   function addMessage(text, type) {
-    const messagesContainer = document.querySelector(".chatbot-messages");
-
-    // Create message wrapper div
     const messageWrapper = document.createElement("div");
     messageWrapper.classList.add("message", type);
 
-    // Create icon for AI or user
+    // Add icon based on the message type
     const icon = document.createElement("span");
     icon.classList.add("icon");
-    icon.innerHTML = type === "user-message" ? "&#128100;" : "&#129302;"; // Emoji icons for user and AI
+    icon.innerHTML = type === "user-message" ? "&#128100;" : "&#129302;"; // User and AI icons
 
-    // Create message text element
     const messageText = document.createElement("p");
     messageText.textContent = text;
 
-    // Append icon and text to message wrapper
     messageWrapper.appendChild(icon);
     messageWrapper.appendChild(messageText);
+    messageContainer.appendChild(messageWrapper);
 
-    // Append message to messages container
-    messagesContainer.appendChild(messageWrapper);
-
-    // Scroll to the latest message
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Auto-scroll to the latest message
+    messageContainer.scrollTop = messageContainer.scrollHeight;
   }
 
-  // Function to simulate AI response (for demonstration purposes)
-  function getAIResponse(userInput) {
-    // Simple response logic, can be replaced with API or GPT model integration
-    if (userInput.toLowerCase().includes("gift")) {
-      return "I can help you find the perfect gift! Tell me more about the person's interests.";
-    } else {
-      return "Let me think... That sounds interesting!";
-    }
-  }
-
-  // Add event listener for Enter key to send message
+  // Event listeners for form submission and Enter key
+  // Enter key & send button for Send message
   document
     .getElementById("user-input")
     .addEventListener("keypress", function (e) {
@@ -67,6 +62,5 @@ window.addEventListener("load", function () {
       }
     });
 
-  // Add event listener for the send button
   document.querySelector(".btn-send").addEventListener("click", sendMessage);
 });
