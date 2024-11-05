@@ -153,13 +153,13 @@ li {
   z-index: 10;
 }
 
-.chatbot-logo {
+.chatbot-logo span {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.chatbot-logo img {
+.chatbot-logo span {
   height: 40px;
 }
 
