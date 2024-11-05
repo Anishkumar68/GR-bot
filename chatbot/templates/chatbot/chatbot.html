@@ -1,0 +1,30 @@
+{% extends 'chatbot/base.html' %} {% load static %}{% block content %}
+<div class="chatbot-container">
+  <!-- Header -->
+  <header class="chatbot-header">
+    <div class="chatbot-logo">
+      <img src="{% static '...' %}" alt="Chatbot Logo" />
+      <!--<img src="{% static 'chatbot/images/logo.png' %}" alt="Chatbot Logo" /> -->
+      <h1>Gift Recommender</h1>
+    </div>
+  </header>
+
+  <!-- Chat Messages -->
+  <div class="chatbot-messages">
+    <!-- Messages go here -->
+  </div>
+
+  <!-- Footer with Input -->
+  <footer class="chatbot-footer">
+    <div class="input-container">
+      <input
+        type="text"
+        placeholder="Type your message here..."
+        id="user-input"
+        class="chatbot-input"
+      />
+      <button class="btn btn-send">&#8593;</button>
+    </div>
+  </footer>
+</div>
+{% endblock %}
