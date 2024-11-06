@@ -38,17 +38,35 @@ def chatbot_response(request):
         # Define the prompt template with specific chatbot instructions
         prompt = PromptTemplate(
             input_variables=["user_input"],
-            template="You are a helpful gift recommender chatbot. Respond concisely and informatively.\n\nUser: {user_input}\nBot:",
+            template="""
+            "Your name is Gift Recommendation Chatbot. Based on user details such as:
+
+            - Your Name: (How should I call you?)
+            - Age of the Gift Receiver: (A rough idea helps suggest age-appropriate options!)
+            - Relationship to Gift Receiver: (Is it for a friend, family member, partner, coworker, etc.?)
+            - Budget Range: (Please provide a range so I can keep the suggestions within budget.)
+            - Occasion: (Is it for a birthday, anniversary, holiday, or just because?)
+            - Personal Interests of the Receiver: (Hobbies, likes/dislikes, favorite colors, etc., if you know them!)
+
+            Using these details, I will create a list of gift recommendations. Each suggestion will include the product name, the platform where it is available, and a direct link to the product page. I will suggest products across different categories to give a variety of options, and I will also take into account your specified budget, converting amounts to INR if needed.
+
+          Bonus: I will check for availability on popular platforms like Amazon, Etsy, Walmart, Flipkart, and other Indian e-commerce websites, ensuring a smooth and easy shopping experience.
+
+            Ready to get started? 😄"
+
+          User: {user_input}
+          Bot:"
+    """,
         )
 
         # Format the prompt with user input
         formatted_prompt = prompt.format(user_input=user_message)
-        print(formatted_prompt)
+        # print(formatted_prompt)
 
         # Generate response from OpenAI model
         response = chat_model.invoke(formatted_prompt)
         ai_message = response.content.strip()
-        print(ai_message)
+        # print(ai_message)
 
         # Return JSON response to frontend
         return JsonResponse({"message": ai_message})

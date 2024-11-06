@@ -20,7 +20,7 @@ window.addEventListener("load", function () {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message: userMessage }),
+      body: JSON.stringify({message: userMessage}),
     });
 
     // Parse the JSON response from the backend
