@@ -1,72 +1,189 @@
-from django.shortcuts import render
 import os
-import json
 from dotenv import load_dotenv
+from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import json
+import spacy
+
+# Import the necessary LangChain components
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_pinecone import PineconeVectorStore
+from langchain.chains import ConversationalRetrievalChain
+from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
+from langchain_core.messages import AIMessage, HumanMessage
+
+from langchain.chat_models import ChatOpenAI
+
+from langchain.vectorstores import Pinecone
+
+from .text_formating import format_text
+
+
+from langchain_community.chat_models import ChatOpenAI
+from langchain_community.vectorstores import Pinecone
+from langchain_openai import OpenAIEmbeddings
+from langchain_core.memory import ConversationBufferMemory
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_core.messages import AIMessage, HumanMessage
+from pinecone import Pinecone, ServerlessSpec  # Pinecone client imports
 
-# Load environment variables from .env file
+
+# Import Pinecone's updated API
+from pinecone import Pinecone, ServerlessSpec
+
+# Load environment variables
 load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
 
-# Set the OpenAI API key
-os.environ["OPENAI_API_KEY"] = os.getenv("openai.api_key")
 
-
-# Home view to render the chatbot HTML page
 def home(request):
-    return render(request, "chatbot/chatbot.html")  # Renders the chatbot HTML interface
+    # Check if the user's name is already in the session
+    user_name = request.session.get("user_name", None)
+
+    # Set the initial prompt based on whether we know the user's name
+    if user_name:
+        initial_prompt = f"Welcome back, {user_name}! How can I assist you with gift recommendations today?"
+    else:
+        initial_prompt = "Hello! I’m here to help you with gift recommendations. Could you start by telling me your name?"
+
+    # Pass the initial prompt to the template
+    context = {"initial_prompt": initial_prompt}
+    return render(request, "chatbot/chatbot.html", context)
 
 
-# Chatbot response API to handle POST requests and generate responses
+# Initialize Pinecone client
+pc = Pinecone(api_key=pinecone_api_key)
+
+# Define index name and create if it doesn't exist
+index_name = "gift-recommendation"
+if index_name not in pc.list_indexes().names():
+    pc.create_index(
+        name=index_name,
+        dimension=1536,  # Make sure this matches your embedding model dimension
+        metric="cosine",
+        spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+    )
+
+# Connect to the created index
+index = pc.Index(index_name)
+
+# Initialize LangChain components
+embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+vector_store = PineconeVectorStore(
+    index=index,
+    embedding=embeddings.embed_query,
+    text_key="text",  # Specify which metadata key stores text
+    namespace="chatbot-memory",
+)
+
+# Setup ChatGPT model and conversation memory
+chat_model = ChatOpenAI(model="gpt-4-turbo", openai_api_key=openai_api_key)
+conversation_memory = ConversationBufferMemory(
+    memory_key="chat_history", return_messages=True
+)
+
+# Load spaCy model for NLP
+nlp = spacy.load("en_core_web_sm")
+
+# Prompt template for responses
+prompt_template = PromptTemplate(
+    input_variables=["user_name", "user_input", "chat_history"],
+    template="""
+    You are a helpful assistant specializing in gift recommendations. The user {user_name} has provided some details.
+
+    Here is the chat history so far:
+    {chat_history}
+
+    User's latest question:
+    {user_input}
+
+    Based on this context and the user's current question, suggest relevant gift ideas, including:
+    - Product name
+    - Platform for purchase
+    - Direct link to the product if available.
+    """,
+)
+
+# Setup retrieval chain
+retrieval_chain = ConversationalRetrievalChain.from_llm(
+    llm=chat_model, retriever=vector_store.as_retriever(), memory=conversation_memory
+)
+
+
+def generate_chatbot_response(user_name, user_input):
+    # Save context with user input and placeholder response text
+    conversation_memory.save_context(
+        {"user_input": user_input},
+        {
+            "assistant_response": f"Responding to {user_name}'s input."
+        },  # Placeholder response for context tracking
+    )
+
+    # Retrieve chat history and format the prompt
+    chat_history = conversation_memory.load_memory_variables({})["chat_history"]
+    formatted_prompt = prompt_template.format(
+        user_name=user_name, user_input=user_input, chat_history=chat_history
+    )
+
+    # Generate response from the model
+    response = chat_model.invoke(formatted_prompt)
+
+    # Extract content if response is an AIMessage object
+    if isinstance(response, AIMessage):
+        response_text = (
+            response.content
+        )  # Get the text content from the AIMessage object
+    elif isinstance(response, dict) and "content" in response:
+        response_text = response["content"]  # Handle if response is a dictionary
+    else:
+        response_text = str(
+            response
+        ).strip()  # Fallback for plain strings or unknown objects
+
+    # Save both user input and actual bot response as plain text to memory
+    conversation_memory.save_context(
+        {"user_input": user_input}, {"assistant_response": response_text}
+    )
+
+    return response_text
+
+
 @csrf_exempt
 def chatbot_response(request):
-    """
-    This view function handles POST requests for the chatbot. It receives user input,
-    formats it using a LangChain prompt, generates a response via OpenAI, and returns
-    the response as JSON.
-    """
     if request.method == "POST":
-        # Parse user input
         data = json.loads(request.body)
-        user_message = data.get("message", "").lower()
+        user_name = data.get("user_name", "User")  # Default name if not provided
+        user_input = data.get("message", "")
 
-        # Initialize the OpenAI chat model
-        chat_model = ChatOpenAI(model="gpt-3.5-turbo")
+        # Call the chatbot function to get the response
+        bot_response = format_text(generate_chatbot_response(user_name, user_input))
 
-        # Define the prompt template with specific chatbot instructions
-        prompt = PromptTemplate(
-            input_variables=["user_input"],
-            template="""
-            "Your name is Gift Recommendation Chatbot. Based on user details such as:
+        # Return the response as JSON
+        return JsonResponse({"message": bot_response})
 
-            - Your Name: (How should I call you?)
-            - Age of the Gift Receiver: (A rough idea helps suggest age-appropriate options!)
-            - Relationship to Gift Receiver: (Is it for a friend, family member, partner, coworker, etc.?)
-            - Budget Range: (Please provide a range so I can keep the suggestions within budget.)
-            - Occasion: (Is it for a birthday, anniversary, holiday, or just because?)
-            - Personal Interests of the Receiver: (Hobbies, likes/dislikes, favorite colors, etc., if you know them!)
 
-            Using these details, I will create a list of gift recommendations. Each suggestion will include the product name, the platform where it is available, and a direct link to the product page. I will suggest products across different categories to give a variety of options, and I will also take into account your specified budget, converting amounts to INR if needed.
-
-          Bonus: I will check for availability on popular platforms like Amazon, Etsy, Walmart, Flipkart, and other Indian e-commerce websites, ensuring a smooth and easy shopping experience.
-
-            Ready to get started? 😄"
-
-          User: {user_input}
-          Bot:"
-    """,
-        )
-
-        # Format the prompt with user input
-        formatted_prompt = prompt.format(user_input=user_message)
-        # print(formatted_prompt)
-
-        # Generate response from OpenAI model
-        response = chat_model.invoke(formatted_prompt)
-        ai_message = response.content.strip()
-        # print(ai_message)
-
-        # Return JSON response to frontend
-        return JsonResponse({"message": ai_message})
+# NLP function for extracting user details
+def extract_user_details(text):
+    doc = nlp(text)
+    details = {
+        "name": None,
+        "relationship": None,
+        "budget": None,
+        "occasion": None,
+        "interests": None,
+    }
+    for ent in doc.ents:
+        if ent.label_ == "PERSON":
+            details["name"] = ent.text
+        elif ent.label_ == "MONEY":
+            details["budget"] = ent.text
+        elif ent.label_ == "EVENT":
+            details["occasion"] = ent.text
+        elif ent.label_ in {"ORG", "PRODUCT"}:
+            details["interests"] = ent.text
+        elif ent.label_ == "NORP":
+            details["relationship"] = ent.text
+    return {key: value for key, value in details.items() if value is not None}
