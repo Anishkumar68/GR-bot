@@ -42,7 +42,7 @@ window.addEventListener("load", function () {
 		icon.innerHTML = type === "user-message" ? "&#128100;" : "&#129302;"; // User and AI icons
 
 		const messageText = document.createElement("p");
-		messageText.textContent = text;
+		messageText.innerHTML = htmlContent;
 
 		messageWrapper.appendChild(icon);
 		messageWrapper.appendChild(messageText);

@@ -21,15 +21,6 @@ from langchain.vectorstores import Pinecone
 from .text_formating import format_text
 
 
-from langchain_community.chat_models import ChatOpenAI
-from langchain_community.vectorstores import Pinecone
-from langchain_openai import OpenAIEmbeddings
-from langchain_core.memory import ConversationBufferMemory
-from langchain_core.prompts import PromptTemplate
-from langchain_core.messages import AIMessage, HumanMessage
-from pinecone import Pinecone, ServerlessSpec  # Pinecone client imports
-
-
 # Import Pinecone's updated API
 from pinecone import Pinecone, ServerlessSpec
 
