@@ -5,7 +5,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 import spacy
-<<<<<<< HEAD
 
 # Import the necessary LangChain components
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -18,20 +17,6 @@ from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOpenAI
 
 from langchain_community.vectorstores import Pinecone
-=======
-
-# Import the necessary LangChain components
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_pinecone import PineconeVectorStore
-from langchain.chains import ConversationalRetrievalChain
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
-from langchain_core.messages import AIMessage, HumanMessage
-
-from langchain.chat_models import ChatOpenAI
-
-from langchain.vectorstores import Pinecone
->>>>>>> cc4938fb1fe71b066f850ad2736358243d6a8319
 
 from .text_formating import format_text
 
@@ -165,13 +150,9 @@ def chatbot_response(request):
         user_input = data.get("message", "")
 
         # Call the chatbot function to get the response
-<<<<<<< HEAD
         # bot_response_test = generate_chatbot_response(user_name, user_input)
         bot_response = format_text(generate_chatbot_response(user_name, user_input))
         # print(bot_response)
-=======
-        bot_response = format_text(generate_chatbot_response(user_name, user_input))
->>>>>>> cc4938fb1fe71b066f850ad2736358243d6a8319
 
         # Return the response as JSON
         return JsonResponse({"message": bot_response})
