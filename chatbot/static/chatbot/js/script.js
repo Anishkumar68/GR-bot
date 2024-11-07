@@ -1,32 +1,32 @@
 window.addEventListener("load", function () {
-	const chatForm = document.getElementById("chatForm");
 	const textInput = document.getElementById("user-input");
 	const messageContainer = document.querySelector(".chatbot-messages");
+	const sendButton = document.getElementById("send-message");
 
 	// Function to handle sending the message
 	async function sendMessage(event) {
-		if (event) event.preventDefault(); // Prevent form from refreshing the page if called from an event
+		if (event) event.preventDefault();
 
 		const userMessage = textInput.value.trim();
-		if (!userMessage) return; // Exit if message is empty
+		if (!userMessage) return;
 
 		// Display user message in the chat
 		addMessage(userMessage, "user-message");
 		textInput.value = ""; // Clear the input field
 
-		// Send the user message to the backend via a POST request
+		// Show typing indicator
+		showTypingIndicator();
+
+		// Send user message to the backend
 		const response = await fetch("/chatbot-response/", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
+			headers: {"Content-Type": "application/json"},
 			body: JSON.stringify({message: userMessage}),
 		});
-
-		// Parse the JSON response from the backend
 		const data = await response.json();
 
-		// Display the AI response in the chat
+		// Hide typing indicator and display AI response
+		hideTypingIndicator();
 		const aiResponse = data.message;
 		addMessage(aiResponse, "ai-response");
 	}
@@ -34,27 +34,41 @@ window.addEventListener("load", function () {
 	// Function to add a message to the chat UI
 	function addMessage(htmlContent, type) {
 		const messageWrapper = document.createElement("div");
-		messageWrapper.classList.add("message", type);
+		messageWrapper.classList.add("message", type, "bubble-animation");
 
-		// Add icon based on the message type
 		const icon = document.createElement("span");
 		icon.classList.add("icon");
-		icon.innerHTML = type === "user-message" ? "&#128100;" : "&#129302;"; // User and AI icons
+		icon.innerHTML = type === "user-message" ? "&#128100;" : "&#129302;";
 
 		const messageText = document.createElement("p");
-		messageText.innerHTML = htmlContent; // Use innerHTML to interpret HTML
+		messageText.innerHTML = htmlContent;
 
 		messageWrapper.appendChild(icon);
 		messageWrapper.appendChild(messageText);
 		messageContainer.appendChild(messageWrapper);
-
-		// Auto-scroll to the latest message
 		messageContainer.scrollTop = messageContainer.scrollHeight;
+	}
+
+	// Typing indicator functions
+	function showTypingIndicator() {
+		const typingIndicator = document.createElement("div");
+		typingIndicator.classList.add("typing-indicator", "bubble-animation");
+		typingIndicator.innerHTML = `<span class="icon">🤖</span><span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
+		typingIndicator.id = "typing-indicator";
+		messageContainer.appendChild(typingIndicator);
+		messageContainer.scrollTop = messageContainer.scrollHeight;
+	}
+
+	function hideTypingIndicator() {
+		const typingIndicator = document.getElementById("typing-indicator");
+		if (typingIndicator) {
+			messageContainer.removeChild(typingIndicator);
+		}
 	}
 
 	// Event listeners for form submission and Enter key
 	textInput.addEventListener("keypress", function (e) {
-		if (e.key === "Enter") sendMessage(e); // Pass the event to sendMessage
+		if (e.key === "Enter") sendMessage(e);
 	});
-	document.querySelector(".btn-send").addEventListener("click", sendMessage); // No event needed here
+	sendButton.addEventListener("click", sendMessage);
 });

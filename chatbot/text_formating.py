@@ -1,6 +1,6 @@
 import re
-import nltk
 from bs4 import BeautifulSoup
+import nltk
 
 # Download necessary NLTK data
 nltk.download("punkt")
@@ -54,24 +54,18 @@ def format_text(dynamic_text):
 
         # Handle headings (Markdown style: #, ##, ###)
         if re.match(r"^### (.+)$", line):  # H3 Heading
-            if current_heading:
-                soup.append(current_heading)
             current_heading = soup.new_tag("h3")
             current_heading.string = re.match(r"^### (.+)$", line).group(1)
             soup.append(current_heading)
             ul_tag = None
             continue
         elif re.match(r"^## (.+)$", line):  # H2 Heading
-            if current_heading:
-                soup.append(current_heading)
             current_heading = soup.new_tag("h2")
             current_heading.string = re.match(r"^## (.+)$", line).group(1)
             soup.append(current_heading)
             ul_tag = None
             continue
         elif re.match(r"^# (.+)$", line):  # H1 Heading
-            if current_heading:
-                soup.append(current_heading)
             current_heading = soup.new_tag("h1")
             current_heading.string = re.match(r"^# (.+)$", line).group(1)
             soup.append(current_heading)
@@ -82,30 +76,27 @@ def format_text(dynamic_text):
         if re.match(r"^\s*- (.+)$", line):  # List item
             if not ul_tag:
                 ul_tag = soup.new_tag("ul")
+                soup.append(ul_tag)
             li_tag = soup.new_tag("li")
             li_tag.string = re.match(r"^\s*- (.+)$", line).group(1)
             ul_tag.append(li_tag)
             continue
         elif ul_tag:
-            soup.append(ul_tag)
+            # Close the list after items are added
             ul_tag = None
 
-        # Convert links in the format [text](url) to <a> tags
-        if re.search(r"\[(.+?)\]\((http[s]?://\S+)\)", line):
-            link_text = re.search(r"\[(.+?)\]\((http[s]?://\S+)\)", line).group(1)
-            link_url = re.search(r"\[(.+?)\]\((http[s]?://\S+)\)", line).group(2)
-            a_tag = soup.new_tag("a", href=link_url, target="_blank")
-            a_tag.string = link_text
-            soup.append(a_tag)
-            continue
+        # Convert links in the format [text](url) to <a> tags within paragraphs
+        line = re.sub(
+            r"\[(.+?)\]\((http[s]?://\S+)\)",
+            r'<a href="\2" target="_blank">\1</a>',
+            line,
+        )
 
-        # Add regular paragraphs if no special format
+        # Add regular paragraphs if no special format is detected
         p_tag = soup.new_tag("p")
-        p_tag.string = line
+        p_tag.append(
+            BeautifulSoup(line, "html.parser")
+        )  # Support inline HTML tags like <a>
         soup.append(p_tag)
-
-    # Append the last heading if exists
-    if current_heading:
-        soup.append(current_heading)
 
     return str(soup)

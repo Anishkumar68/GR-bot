@@ -13,37 +13,20 @@
 	<!-- Chat Messages -->
 	<div class="chatbot-messages">
 		<!-- Initial Prompt from Backend -->
-		<div class="message ai-response fade-in">
-			<span class="icon">🤖</span>
-			<p>{{ initial_prompt }}</p>
-		</div>
+		<div class="message ai-response fade-in"></div>
 	</div>
 
 	<!-- Footer with Input -->
 	<footer class="chatbot-footer">
 		<div class="input-container">
-			<!-- Name Input Section -->
-			<div id="name-input-section">
-				<input
-					type="text"
-					id="user-input"
-					placeholder="Enter your name..."
-					autocomplete="off"
-					required
-				/>
-				<button type="button" class="btn-send" id="submit-name">&#8593;</button>
-			</div>
-
-			<!-- Main chat input, hidden initially until name is received -->
-			<div id="chat-input-section" style="display: none">
-				<input
-					type="text"
-					id="chat-input"
-					placeholder="Type your message..."
-					autocomplete="off"
-				/>
-				<button class="btn-send" id="send-message">&#8593;</button>
-			</div>
+			<input
+				type="text"
+				id="user-input"
+				placeholder="Type your message..."
+				autocomplete="off"
+				required
+			/>
+			<button type="button" class="btn-send" id="send-message">&#8593;</button>
 		</div>
 	</footer>
 </div>
