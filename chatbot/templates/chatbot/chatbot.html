@@ -1,32 +1,50 @@
-{% extends 'chatbot/base.html' %} {% load static %}{% block content %}
+{% extends 'chatbot/base.html' %} {% load static %} {% block content %}
 <div class="chatbot-container">
-  <!-- Header -->
-  <header class="chatbot-header">
-    <div class="chatbot-logo">
-      <img
-        src="{% static 'chatbot/images/gift chatbot.png' %}"
-        alt="Chatbot Logo"
-      />
-    </div>
-    <h1 class="logo-text">Gift Recommender</h1>
-  </header>
+	<header class="chatbot-header">
+		<div class="chatbot-logo">
+			<img
+				src="{% static 'chatbot/images/gift chatbot.png' %}"
+				alt="Chatbot Logo"
+			/>
+		</div>
+		<h1 class="logo-text">Gifty</h1>
+	</header>
 
-  <!-- Chat Messages -->
-  <div class="chatbot-messages">
-    <!-- Messages go here -->
-  </div>
+	<!-- Chat Messages -->
+	<div class="chatbot-messages">
+		<!-- Initial Prompt from Backend -->
+		<div class="message ai-response fade-in">
+			<span class="icon">🤖</span>
+			<p>{{ initial_prompt }}</p>
+		</div>
+	</div>
 
-  <!-- Footer with Input -->
-  <footer class="chatbot-footer">
-    <div class="input-container">
-      <input
-        type="text"
-        placeholder="Type your message here..."
-        id="user-input"
-        class="chatbot-input"
-      />
-      <button class="btn btn-send">&#8593;</button>
-    </div>
-  </footer>
+	<!-- Footer with Input -->
+	<footer class="chatbot-footer">
+		<div class="input-container">
+			<!-- Name Input Section -->
+			<div id="name-input-section">
+				<input
+					type="text"
+					id="user-input"
+					placeholder="Enter your name..."
+					autocomplete="off"
+					required
+				/>
+				<button type="button" class="btn-send" id="submit-name">&#8593;</button>
+			</div>
+
+			<!-- Main chat input, hidden initially until name is received -->
+			<div id="chat-input-section" style="display: none">
+				<input
+					type="text"
+					id="chat-input"
+					placeholder="Type your message..."
+					autocomplete="off"
+				/>
+				<button class="btn-send" id="send-message">&#8593;</button>
+			</div>
+		</div>
+	</footer>
 </div>
 {% endblock %}
