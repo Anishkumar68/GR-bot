@@ -20,7 +20,11 @@ window.addEventListener("load", function () {
 			headers: {
 				"Content-Type": "application/json",
 			},
+<<<<<<< HEAD
 			body: JSON.stringify({message: userMessage}),
+=======
+			body: JSON.stringify({ message: userMessage }),
+>>>>>>> cc4938fb1fe71b066f850ad2736358243d6a8319
 		});
 
 		// Parse the JSON response from the backend
@@ -32,7 +36,11 @@ window.addEventListener("load", function () {
 	}
 
 	// Function to add a message to the chat UI
+<<<<<<< HEAD
 	function addMessage(htmlContent, type) {
+=======
+	function addMessage(text, type) {
+>>>>>>> cc4938fb1fe71b066f850ad2736358243d6a8319
 		const messageWrapper = document.createElement("div");
 		messageWrapper.classList.add("message", type);
 
@@ -42,7 +50,11 @@ window.addEventListener("load", function () {
 		icon.innerHTML = type === "user-message" ? "&#128100;" : "&#129302;"; // User and AI icons
 
 		const messageText = document.createElement("p");
+<<<<<<< HEAD
 		messageText.innerHTML = htmlContent; // Use innerHTML to interpret HTML
+=======
+		messageText.innerHTML = htmlContent;
+>>>>>>> cc4938fb1fe71b066f850ad2736358243d6a8319
 
 		messageWrapper.appendChild(icon);
 		messageWrapper.appendChild(messageText);
