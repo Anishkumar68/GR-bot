@@ -2,6 +2,11 @@
 
 # GR-bot
 
+Gifty: Your Personal Gift Recommendation Chatbot 🎁
+
+Finding the perfect gift just got easier with Gifty. Simple, direct, and to the point, Gifty provides personalized gift suggestions for any occasion and recipient. Whether it's a birthday, anniversary, holiday, or just because, let Gifty help you discover the ideal present with ease. Start chatting and find the perfect gift today!
+
+
 Fig : interface of the chatbot
 
 ![image](https://github.com/user-attachments/assets/a968df4b-c1e6-4753-a8fb-3b7c8c0ad8c9)
