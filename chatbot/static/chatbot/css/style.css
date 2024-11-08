@@ -1,11 +1,9 @@
-/* Global Reset */
 * {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 }
 
-/* Global Styles */
 body {
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 	background-color: #fafafa;
@@ -13,7 +11,6 @@ body {
 	overflow-x: hidden;
 }
 
-/* Animation for content fade-in */
 @keyframes fadeIn {
 	from {
 		opacity: 0;
@@ -38,6 +35,7 @@ body {
 	padding: 20px;
 }
 
+/* Template of style for html elements*/
 /* Titles and Headings */
 h1,
 h2,

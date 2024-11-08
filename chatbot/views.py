@@ -6,7 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import spacy
 
-# Import the necessary LangChain components
+# Import the necessary LangChain components pip install langchain install complete langchain then.
+# import help page (https://python.langchain.com/docs/introduction/)
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_pinecone import PineconeVectorStore
 from langchain.chains import ConversationalRetrievalChain
@@ -21,39 +22,39 @@ from langchain_community.vectorstores import Pinecone
 from .text_formating import format_text
 
 
-# Import Pinecone's updated API
+# Import Pinecone's 
 from pinecone import Pinecone, ServerlessSpec
 
-# Load environment variables
+# Security == Load environment variables 
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
 
 
 def home(request):
-    # Check if the user's name is already in the session
-    user_name = request.session.get("user_name", None)
+    #No need #  Check if the user's name 
+    # user_name = request.session.get("user_name", None)
 
-    # Set the initial prompt based on whether we know the user's name
-    if user_name:
-        initial_prompt = f"Welcome back, {user_name}! How can I assist you with gift recommendations today?"
-    else:
-        initial_prompt = "Hello! I’m here to help you with gift recommendations. Could you start by telling me your name?"
+    # # if user exists
+    # if user_name:
+    #     initial_prompt = f"Welcome back, {user_name}! How can I assist you with gift recommendations today?"
+    # else:
+    #     initial_prompt = "Hello! I’m here to help you with gift recommendations. Could you start by telling me your name?"
 
-    # Pass the initial prompt to the template
-    context = {"initial_prompt": initial_prompt}
-    return render(request, "chatbot/chatbot.html", context)
+    # # Pass the initial prompt to the template
+    # context = {"initial_prompt": initial_prompt}
+    return render(request, "chatbot/chatbot.html")
 
 
 # Initialize Pinecone client
 pc = Pinecone(api_key=pinecone_api_key)
 
-# Define index name and create if it doesn't exist
+#Index name pinecone
 index_name = "gift-recommendation"
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
-        dimension=1536,  # Make sure this matches your embedding model dimension
+        dimension=1536,  
         metric="cosine",
         spec=ServerlessSpec(cloud="aws", region="us-east-1"),
     )
@@ -61,12 +62,12 @@ if index_name not in pc.list_indexes().names():
 # Connect to the created index
 index = pc.Index(index_name)
 
-# Initialize LangChain components
+# Initialize LangChain components check langchain documentation
 embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 vector_store = PineconeVectorStore(
     index=index,
     embedding=embeddings.embed_query,
-    text_key="text",  # Specify which metadata key stores text
+    text_key="text", 
     namespace="chatbot-memory",
 )
 
@@ -138,13 +139,15 @@ def generate_chatbot_response(user_name, user_input):
     if isinstance(response, AIMessage):
         response_text = (
             response.content
-        )  # Get the text content from the AIMessage object
+        ) 
+         # Get the text content from the AIMessage object
     elif isinstance(response, dict) and "content" in response:
-        response_text = response["content"]  # Handle if response is a dictionary
+        response_text = response["content"] 
+        # Handle if response is a dictionary
     else:
         response_text = str(
             response
-        ).strip()  # Fallback for plain strings or unknown objects
+        ).strip()  #
 
     # Save both user input and actual bot response as plain text to memory
     conversation_memory.save_context(
@@ -158,7 +161,8 @@ def generate_chatbot_response(user_name, user_input):
 def chatbot_response(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        user_name = data.get("user_name", "User")  # Default name if not provided
+        user_name = data.get("user_name", "User") 
+        # Default name if not provided
         user_input = data.get("message", "")
 
         # Call the chatbot function to get the response

@@ -21,7 +21,7 @@ def clean_text(text):
 
     # Keep URLs intact and remove unwanted characters
     cleaned_text = re.sub(
-        r"((http|https)://\S+)|[^!?()\[\]{}.\-\w\s$:]",  # Allow URLs, specific punctuations
+        r"((http|https)://\S+)|[^!?()\[\]{}.\-\w\s$:]",  
         lambda match: preserve_links(match) if match.group(1) else "",
         text,
     )
@@ -96,7 +96,7 @@ def format_text(dynamic_text):
         p_tag = soup.new_tag("p")
         p_tag.append(
             BeautifulSoup(line, "html.parser")
-        )  # Support inline HTML tags like <a>
+        )  
         soup.append(p_tag)
 
     return str(soup)

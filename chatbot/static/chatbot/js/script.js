@@ -3,7 +3,7 @@ window.addEventListener("load", function () {
 	const messageContainer = document.querySelector(".chatbot-messages");
 	const sendButton = document.getElementById("send-message");
 
-	// Function to handle sending the message
+	// Sending the message
 	async function sendMessage(event) {
 		if (event) event.preventDefault();
 
